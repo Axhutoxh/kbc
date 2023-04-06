@@ -1,58 +1,158 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+  <div class="row bg-grey-2" style="height:100vh">
+
+    <!--Right Block -->
+    <div class="col ">
+      <div class="column justify-center" style="height:100vh">
+        <div class="col-6 ">
+          <div class="row justify-center full-height">
+            <div class="col-7 " style="min-width:40vh">
+              <div class="column full-height">
+                <!----Form Header----->
+                <div class="col-2 ">
+                  <!-----Logo part----->
+          
+                  <!----Form Heading--->
+                  <div class="text-center header q-mt-md">
+                    <div class=" text-h4 text-bold">
+                      Admin Login
+                    </div>
+                  </div>
+                </div>
+                <!----SignUp Form----->
+                <div class="col-8 q-mt-lg  ">
+                  <form
+                    @submit="onSubmit"
+                    class="text-grey-10 q-mt-lg q-px-md"
+                  >
+                    <div class="q-mt-xs">
+                      <div class=" text-subtitle ">Email*</div>
+                      <input
+                        outlined
+                        dense
+                        lazy-rules
+                        type="text"
+                        class="q-mt-xs "
+                        v-model="admin.email"
+                        :rules="[
+                          val => !!val || 'Email is Required',
+                          isValidEmail
+                        ]"
+                        placeholder="Enter your email"
+                      />
+                    </div>
+                    <div class="q-mt-xs">
+                      <div class=" text-subtitle">Password*</div>
+                      <input
+                        outlined
+                        dense
+                        lazy-rules
+                        type="password"
+                        class="q-mt-xs "
+                        v-model="admin.password"
+                        :rules="[val => !!val || 'Password is Required']"
+                        placeholder="Enter password"
+                      />
+                    </div>
+            
+    <button @click="AuthProvider('facebook')"> Facebook</button>
+    <button @click="AuthProvider('google')">Google</button>
+         
+
+
+                  </form>
+                  <!-- Forgot Password -->
+                  <!-- <div class="text-center q-mt-lg text-green-14 cursor-pointer">
+                    <div>
+                      Forgot Password ?
+                    </div>
+                  </div> -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import Vue from "vue";
+import VueAxios from "vue-axios";
+import VueSocialauth from "vue-social-auth";
+import axios from "axios";
+import hello from "hellojs";
+
+
+Vue.use(VueAxios, axios);
+Vue.use(VueSocialauth, {
+  providers: {
+    facebook: {
+      clientId: "659715154536727",
+      redirectUri:
+        "http://cryptic-bayou-98994.herokuapp.com/api/user/login/facebook"
+    },
+    google: {
+      clientId:
+        "851572370898-mbc7j99jvme4hvkea5326be433guiu0l.apps.googleusercontent.com",
+      redirectUri:
+        "https://lvkos.csb.app"
+    }
+  }
+});
 export default {
   name: 'HelloWorld',
-  props: {
-    msg: String
+  data() {
+    return {
+      admin: {
+        email: '',
+        password: ''
+      }
+    }
+  },
+
+  methods: {
+    ...mapActions(['signIn']),
+    isValidEmail(val) {
+      const emailPattern = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/
+
+      return emailPattern.test(val) || 'Invalid email'
+    },
+    onSubmit() {
+      const { signIn, admin } = this
+      signIn(admin)
+    },
+    helogin() {
+      hello("google").login()
+    },
+    AuthProvider(provider) {
+      var self = this;
+
+      this.$auth.authenticate(provider).then(response => {
+        console.log(response);
+        self.SocialLogin(provider,response)
+          }).catch(err => {
+            console.log({err:err})
+        
+      });
+    },
+
+    SocialLogin(provider, response) {
+      this.$http
+        .post("https://cryptic-bayou-98994.herokuapp.com/api/user/login/" + provider+'/callback', response)
+        .then(response => {
+          console.log(response.data);
+        })
+        .catch(err => {
+          console.log({ err: err });
+        });
+    }
   }
 }
 </script>
+<style lang="scss">
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
 </style>
